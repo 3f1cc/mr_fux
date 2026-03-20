@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="background">#FF000000</color>
+    <color name="staff_line">#FF111111</color>
+    <color name="note_dim">#FF777777</color>
+    <color name="note_bright">#FFFFFFFF</color>
+    <color name="button_bg">#FF1A1A1A</color>
+    <color name="button_text">#FFAAAAAA</color>
+    <color name="status_text">#FFAAAAAA</color>
+    <color name="active_button_bg">#FF333333</color>
+    <color name="active_button_text">#FFFFFFFF</color>
+</resources>
