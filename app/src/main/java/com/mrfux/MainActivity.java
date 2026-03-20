@@ -172,13 +172,18 @@ public class MainActivity extends Activity {
 
     private void moveCursor(int delta) {
         if (checkMode) {
-            // In check mode: left/right navigates between issues at cursor
+            // In check mode: left/right cycles through violations at the cursor.
+            // When already at the boundary of the violation list, the cursor moves.
             List<Violation> vols = model.violationsAt(cursor, activeVoice);
             if (!vols.isEmpty()) {
-                issueIdx = Math.max(0, Math.min(vols.size() - 1, issueIdx + delta));
-                updateStatusBar();
-                refreshStaff();
-                return;
+                int newIdx = issueIdx + delta;
+                if (newIdx >= 0 && newIdx < vols.size()) {
+                    issueIdx = newIdx;
+                    updateStatusBar();
+                    refreshStaff();
+                    return;
+                }
+                // Fell off the end — fall through to normal cursor movement below
             }
         }
         cursor = Math.max(1, Math.min(model.getLength(), cursor + delta));
