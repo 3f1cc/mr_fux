@@ -267,7 +267,7 @@ public class StaffView extends View {
     private void drawStaves(Canvas canvas) {
         paint.setStyle(Paint.Style.FILL_AND_STROKE);
         paint.setStrokeWidth(1f);
-        paint.setColor(levelColor(1));
+        paint.setColor(levelColor(4));
 
         float x1 = STAFF_X1 * scale;
         float x2 = STAFF_X2 * scale;
@@ -286,7 +286,7 @@ public class StaffView extends View {
     }
 
     private void drawLedger(Canvas canvas, float x, int pos) {
-        paint.setColor(levelColor(1));
+        paint.setColor(levelColor(4));
         paint.setStyle(Paint.Style.FILL_AND_STROKE);
         paint.setStrokeWidth(1f);
         float halfW = 4 * scale;
