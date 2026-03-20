@@ -48,7 +48,7 @@ public class StaffView extends View {
     private static final int[] PC_TO_DIA = {0,0,1,1,2,3,3,4,4,5,5,6};
 
     // Note layout — narrow mode (layout=2) is the default
-    private float noteX0 = 10f;
+    private float noteX0 = 14f;
     private float noteDx = 7f;
 
     // ---------------------------------------------------------------
@@ -128,8 +128,8 @@ public class StaffView extends View {
     public void setNoteLevels(int[] cf, int[] cp)  { cfLevels = cf; cpLevels = cp; invalidate(); }
 
     public void setLayout(boolean narrow) {
-        if (narrow) { noteX0 = 10f; noteDx = 7f; }
-        else        { noteX0 = 14f; noteDx = 14f; }
+        if (narrow) { noteX0 = 14f; noteDx = 7f; }
+        else        { noteX0 = 18f; noteDx = 14f; }
         scrollOffset = 0f;
         updateScroll();
         invalidate();
@@ -369,7 +369,7 @@ public class StaffView extends View {
         paint.setStrokeCap(Paint.Cap.ROUND);
 
         // C-shape (backward C) centred on F3
-        float r = 2.5f * scale;
+        float r = 2.0f * scale;
         paint.setStyle(Paint.Style.STROKE);
         paint.setStrokeWidth(0.9f * scale);
         RectF arcOval = new RectF(cx - r, fY - r, cx + r, fY + r);
@@ -377,7 +377,7 @@ public class StaffView extends View {
         canvas.drawArc(arcOval, 90f, 180f, false, paint);
 
         // Two dots to the right of the arc, one space above and below F3
-        float dotX = cx + r + 1.5f * scale;
+        float dotX = cx + r + 1.0f * scale;
         float dotR = 0.85f * scale;
         paint.setStyle(Paint.Style.FILL);
         canvas.drawCircle(dotX, fY - 2f * scale, dotR, paint);

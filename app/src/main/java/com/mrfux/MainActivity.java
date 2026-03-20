@@ -474,7 +474,8 @@ public class MainActivity extends Activity {
     // ---------------------------------------------------------------
 
     private File saveDir() {
-        File dir = new File(getFilesDir(), "mr_fux");
+        File externalDir = getExternalFilesDir(null);
+        File dir = new File(externalDir != null ? externalDir : getFilesDir(), "mr_fux");
         if (!dir.exists()) dir.mkdirs();
         return dir;
     }
