@@ -3,8 +3,7 @@ package com.mrfux.ui;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.Path;
-import android.graphics.RectF;
+import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -84,6 +83,23 @@ public class StaffView extends View {
 
     // Paints
     private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+
+    // Music font (Bravura, SMuFL)
+    private Typeface musicTypeface = null;
+
+    private Typeface getMusicTypeface() {
+        if (musicTypeface == null) {
+            try {
+                musicTypeface = Typeface.createFromAsset(getContext().getAssets(), "fonts/Bravura.otf");
+            } catch (Exception e) {
+                musicTypeface = Typeface.DEFAULT;
+            }
+        }
+        return musicTypeface;
+    }
+
+    // Text size for music glyphs: 1 em = 4 staff spaces, staff space = 2*STEP*scale = 4*scale
+    private float musicTextSize() { return 16f * scale; }
 
     // Touch tracking for swipe
     private float touchDownX, touchDownY;
@@ -314,117 +330,58 @@ public class StaffView extends View {
         }
     }
 
-    private boolean isNarrow() { return noteDx < 10f; }
-
     /**
-     * Draw a simplified treble clef in the space to the left of the first note.
-     * The clef is anchored to the G4 line (treble staff, position 4).
+     * Draw the treble (G) clef using the Bravura music font.
+     * SMuFL U+E050: glyph origin sits on the G4 line.
      */
     private void drawTrebleClef(Canvas canvas) {
-        float cx  = (STAFF_X1 + noteX0) / 2f * scale;  // horizontal centre of clef area
-        float gY  = staffY(4);    // G4 — the line the treble clef marks
-
+        paint.setTypeface(getMusicTypeface());
+        paint.setTextSize(musicTextSize());
         paint.setColor(levelColor(10));
-        paint.setStyle(Paint.Style.STROKE);
-        paint.setStrokeCap(Paint.Cap.ROUND);
-        paint.setStrokeJoin(Paint.Join.ROUND);
-        paint.setStrokeWidth(0.9f * scale);
-
-        // Oval around the G4 line — the most recognisable part of the treble clef
-        float ovalRx = 2.3f * scale;
-        float ovalRy = 1.6f * scale;
-        canvas.drawOval(cx - ovalRx, gY - ovalRy, cx + ovalRx, gY + ovalRy, paint);
-
-        // Upper stem: from just below the top hook down to the top of the oval
-        float topY   = staffY(13);
-        float hookBotY = topY + 3.5f * scale;
-        canvas.drawLine(cx, hookBotY, cx, gY - ovalRy, paint);
-
-        // Top curl: a small rightward hook at the tip of the stem
-        Path hook = new Path();
-        hook.moveTo(cx - scale, topY + 1.5f * scale);
-        hook.cubicTo(cx + 3f * scale, topY,
-                     cx + 3f * scale, topY + 3f * scale,
-                     cx,              hookBotY);
-        canvas.drawPath(hook, paint);
-
-        // Lower tail: curves down-left from the bottom of the oval
-        Path tail = new Path();
-        tail.moveTo(cx, gY + ovalRy);
-        tail.cubicTo(cx,              gY + ovalRy + 4f * scale,
-                     cx - 4f * scale, staffY(1),
-                     cx - 1f * scale, staffY(-1));
-        canvas.drawPath(tail, paint);
+        paint.setStyle(Paint.Style.FILL);
+        paint.setTextAlign(Paint.Align.LEFT);
+        canvas.drawText("\uE050", STAFF_X1 * scale, staffY(4), paint);
     }
 
     /**
-     * Draw a simplified bass clef in the space to the left of the first note.
-     * The clef is anchored to the F3 line (bass staff, position −4).
+     * Draw the bass (F) clef using the Bravura music font.
+     * SMuFL U+E062: glyph origin sits on the F3 line.
      */
     private void drawBassClef(Canvas canvas) {
-        float cx = (STAFF_X1 + noteX0) / 2f * scale;
-        float fY = staffY(-4);   // F3 — the line the bass clef marks
-
+        paint.setTypeface(getMusicTypeface());
+        paint.setTextSize(musicTextSize());
         paint.setColor(levelColor(10));
-        paint.setStrokeCap(Paint.Cap.ROUND);
-
-        // C-shape (backward C) centred on F3
-        float r = 2.0f * scale;
-        paint.setStyle(Paint.Style.STROKE);
-        paint.setStrokeWidth(0.9f * scale);
-        RectF arcOval = new RectF(cx - r, fY - r, cx + r, fY + r);
-        // sweepAngle=180 from startAngle=90 draws a "(" curve opening to the right
-        canvas.drawArc(arcOval, 90f, 180f, false, paint);
-
-        // Two dots to the right of the arc, one space above and below F3
-        float dotX = cx + r + 1.0f * scale;
-        float dotR = 0.85f * scale;
         paint.setStyle(Paint.Style.FILL);
-        canvas.drawCircle(dotX, fY - 2f * scale, dotR, paint);
-        canvas.drawCircle(dotX, fY + 2f * scale, dotR, paint);
+        paint.setTextAlign(Paint.Align.LEFT);
+        canvas.drawText("\uE062", STAFF_X1 * scale, staffY(-4), paint);
     }
 
+    /**
+     * Draw a cantus firmus whole notehead (SMuFL U+E0A2, round open oval).
+     * Glyph origin is horizontally at the left edge; use CENTER align so the
+     * notehead is centred on x.  Vertically, the SMuFL origin sits on the
+     * staff line (baseline = note position), matching Android drawText baseline.
+     */
     private void drawCfNote(Canvas canvas, float x, float y, int level) {
+        paint.setTypeface(getMusicTypeface());
+        paint.setTextSize(musicTextSize());
         paint.setColor(levelColor(level));
-        paint.setStyle(Paint.Style.STROKE);
-        paint.setStrokeCap(Paint.Cap.ROUND);
-        float rx, ry;
-        if (isNarrow()) {
-            rx = 2.5f * scale;
-            ry = 1.5f * scale;
-            paint.setStrokeWidth(0.8f * scale);
-        } else {
-            rx = 4.0f * scale;
-            ry = 2.5f * scale;
-            paint.setStrokeWidth(1.1f * scale);
-        }
-        // Open oval — standard round whole note
-        canvas.drawOval(x - rx, y - ry, x + rx, y + ry, paint);
+        paint.setStyle(Paint.Style.FILL);
+        paint.setTextAlign(Paint.Align.CENTER);
+        canvas.drawText("\uE0A2", x, y, paint);
     }
 
+    /**
+     * Draw a counterpoint diamond whole notehead (SMuFL U+E0DB).
+     * Same positioning logic as drawCfNote.
+     */
     private void drawCpNote(Canvas canvas, float x, float y, int level) {
+        paint.setTypeface(getMusicTypeface());
+        paint.setTextSize(musicTextSize());
         paint.setColor(levelColor(level));
-        paint.setStyle(Paint.Style.STROKE);
-        paint.setStrokeCap(Paint.Cap.ROUND);
-        paint.setStrokeJoin(Paint.Join.MITER);
-        float rx, ry;
-        if (isNarrow()) {
-            rx = 2.5f * scale;
-            ry = 1.5f * scale;
-            paint.setStrokeWidth(0.8f * scale);
-        } else {
-            rx = 4.0f * scale;
-            ry = 2.5f * scale;
-            paint.setStrokeWidth(1.1f * scale);
-        }
-        // Open diamond — standard diamond/square whole note (e.g. harmonics, CP voice)
-        Path path = new Path();
-        path.moveTo(x,      y - ry);   // top
-        path.lineTo(x + rx, y);        // right
-        path.lineTo(x,      y + ry);   // bottom
-        path.lineTo(x - rx, y);        // left
-        path.close();
-        canvas.drawPath(path, paint);
+        paint.setStyle(Paint.Style.FILL);
+        paint.setTextAlign(Paint.Align.CENTER);
+        canvas.drawText("\uE0DB", x, y, paint);
     }
 
     // ---------------------------------------------------------------
