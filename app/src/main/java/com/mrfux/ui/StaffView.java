@@ -98,8 +98,13 @@ public class StaffView extends View {
         return musicTypeface;
     }
 
-    // Text size for music glyphs: 1 em = 4 staff spaces, staff space = 2*STEP*scale = 4*scale
-    private float musicTextSize() { return 16f * scale; }
+    // Text sizes for Bravura glyphs.
+    // At 16*scale, 1 em = 4 staff spaces (exact SMuFL match), but that makes
+    // noteheadWhole (advance 422/1000 em = 6.75 units) nearly fill the 7-unit
+    // narrow note step, leaving no gap.  Using smaller sizes keeps proportions
+    // acceptable while giving visible breathing room between glyphs.
+    private float clefTextSize() { return 12f * scale; }   // slightly smaller clefs
+    private float noteTextSize() { return 11f * scale; }   // notehead ≈ 4.6 units wide
 
     // Touch tracking for swipe
     private float touchDownX, touchDownY;
@@ -336,7 +341,7 @@ public class StaffView extends View {
      */
     private void drawTrebleClef(Canvas canvas) {
         paint.setTypeface(getMusicTypeface());
-        paint.setTextSize(musicTextSize());
+        paint.setTextSize(clefTextSize());
         paint.setColor(levelColor(10));
         paint.setStyle(Paint.Style.FILL);
         paint.setTextAlign(Paint.Align.LEFT);
@@ -349,7 +354,7 @@ public class StaffView extends View {
      */
     private void drawBassClef(Canvas canvas) {
         paint.setTypeface(getMusicTypeface());
-        paint.setTextSize(musicTextSize());
+        paint.setTextSize(clefTextSize());
         paint.setColor(levelColor(10));
         paint.setStyle(Paint.Style.FILL);
         paint.setTextAlign(Paint.Align.LEFT);
@@ -364,7 +369,7 @@ public class StaffView extends View {
      */
     private void drawCfNote(Canvas canvas, float x, float y, int level) {
         paint.setTypeface(getMusicTypeface());
-        paint.setTextSize(musicTextSize());
+        paint.setTextSize(noteTextSize());
         paint.setColor(levelColor(level));
         paint.setStyle(Paint.Style.FILL);
         paint.setTextAlign(Paint.Align.CENTER);
@@ -372,16 +377,17 @@ public class StaffView extends View {
     }
 
     /**
-     * Draw a counterpoint diamond whole notehead (SMuFL U+E0DB).
-     * Same positioning logic as drawCfNote.
+     * Draw a counterpoint diamond whole notehead (SMuFL U+E0D8 noteheadDiamondWhole).
+     * U+E0D8 is the open/hollow diamond whole note (2-contour glyph); U+E0DB is
+     * noteheadDiamondBlack (filled), which was used incorrectly before.
      */
     private void drawCpNote(Canvas canvas, float x, float y, int level) {
         paint.setTypeface(getMusicTypeface());
-        paint.setTextSize(musicTextSize());
+        paint.setTextSize(noteTextSize());
         paint.setColor(levelColor(level));
         paint.setStyle(Paint.Style.FILL);
         paint.setTextAlign(Paint.Align.CENTER);
-        canvas.drawText("\uE0DB", x, y, paint);
+        canvas.drawText("\uE0D8", x, y, paint);
     }
 
     // ---------------------------------------------------------------
