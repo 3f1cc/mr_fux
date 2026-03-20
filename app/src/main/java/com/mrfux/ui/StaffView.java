@@ -3,6 +3,8 @@ package com.mrfux.ui;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Path;
+import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -240,6 +242,10 @@ public class StaffView extends View {
             if (cpMidi > 0) drawCpNote(canvas, x, staffY(cpPos), cpLv);
             if (cfMidi > 0) drawCfNote(canvas, x, staffY(cfPos), cfLv);
         }
+
+        // Clefs drawn last so they always appear above scrolled notes
+        drawTrebleClef(canvas);
+        drawBassClef(canvas);
     }
 
     private int noteLevelCf(int step) {
@@ -249,8 +255,8 @@ public class StaffView extends View {
         boolean playingHere = playing && step == playPos;
         if (playingHere)                              return 15;
         if (step == cursor && activeVoice == 1)       return 15;
-        if (step == cursor)                           return 11;
-        return 7;
+        if (step == cursor)                           return 13;
+        return 11;
     }
 
     private int noteLevelCp(int step) {
@@ -260,14 +266,14 @@ public class StaffView extends View {
         boolean playingHere = playing && step == playPos;
         if (playingHere)                              return 15;
         if (step == cursor && activeVoice == 2)       return 15;
-        if (step == cursor)                           return 11;
-        return 7;
+        if (step == cursor)                           return 13;
+        return 11;
     }
 
     private void drawStaves(Canvas canvas) {
         paint.setStyle(Paint.Style.FILL_AND_STROKE);
         paint.setStrokeWidth(1f);
-        paint.setColor(levelColor(4));
+        paint.setColor(levelColor(8));
 
         float x1 = STAFF_X1 * scale;
         float x2 = STAFF_X2 * scale;
@@ -286,7 +292,7 @@ public class StaffView extends View {
     }
 
     private void drawLedger(Canvas canvas, float x, int pos) {
-        paint.setColor(levelColor(4));
+        paint.setColor(levelColor(8));
         paint.setStyle(Paint.Style.FILL_AND_STROKE);
         paint.setStrokeWidth(1f);
         float halfW = 4 * scale;
@@ -310,29 +316,115 @@ public class StaffView extends View {
 
     private boolean isNarrow() { return noteDx < 10f; }
 
+    /**
+     * Draw a simplified treble clef in the space to the left of the first note.
+     * The clef is anchored to the G4 line (treble staff, position 4).
+     */
+    private void drawTrebleClef(Canvas canvas) {
+        float cx  = (STAFF_X1 + noteX0) / 2f * scale;  // horizontal centre of clef area
+        float gY  = staffY(4);    // G4 — the line the treble clef marks
+
+        paint.setColor(levelColor(10));
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeCap(Paint.Cap.ROUND);
+        paint.setStrokeJoin(Paint.Join.ROUND);
+        paint.setStrokeWidth(0.9f * scale);
+
+        // Oval around the G4 line — the most recognisable part of the treble clef
+        float ovalRx = 2.3f * scale;
+        float ovalRy = 1.6f * scale;
+        canvas.drawOval(cx - ovalRx, gY - ovalRy, cx + ovalRx, gY + ovalRy, paint);
+
+        // Upper stem: from just below the top hook down to the top of the oval
+        float topY   = staffY(13);
+        float hookBotY = topY + 3.5f * scale;
+        canvas.drawLine(cx, hookBotY, cx, gY - ovalRy, paint);
+
+        // Top curl: a small rightward hook at the tip of the stem
+        Path hook = new Path();
+        hook.moveTo(cx - scale, topY + 1.5f * scale);
+        hook.cubicTo(cx + 3f * scale, topY,
+                     cx + 3f * scale, topY + 3f * scale,
+                     cx,              hookBotY);
+        canvas.drawPath(hook, paint);
+
+        // Lower tail: curves down-left from the bottom of the oval
+        Path tail = new Path();
+        tail.moveTo(cx, gY + ovalRy);
+        tail.cubicTo(cx,              gY + ovalRy + 4f * scale,
+                     cx - 4f * scale, staffY(1),
+                     cx - 1f * scale, staffY(-1));
+        canvas.drawPath(tail, paint);
+    }
+
+    /**
+     * Draw a simplified bass clef in the space to the left of the first note.
+     * The clef is anchored to the F3 line (bass staff, position −4).
+     */
+    private void drawBassClef(Canvas canvas) {
+        float cx = (STAFF_X1 + noteX0) / 2f * scale;
+        float fY = staffY(-4);   // F3 — the line the bass clef marks
+
+        paint.setColor(levelColor(10));
+        paint.setStrokeCap(Paint.Cap.ROUND);
+
+        // C-shape (backward C) centred on F3
+        float r = 2.5f * scale;
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeWidth(0.9f * scale);
+        RectF arcOval = new RectF(cx - r, fY - r, cx + r, fY + r);
+        // sweepAngle=180 from startAngle=90 draws a "(" curve opening to the right
+        canvas.drawArc(arcOval, 90f, 180f, false, paint);
+
+        // Two dots to the right of the arc, one space above and below F3
+        float dotX = cx + r + 1.5f * scale;
+        float dotR = 0.85f * scale;
+        paint.setStyle(Paint.Style.FILL);
+        canvas.drawCircle(dotX, fY - 2f * scale, dotR, paint);
+        canvas.drawCircle(dotX, fY + 2f * scale, dotR, paint);
+    }
+
     private void drawCfNote(Canvas canvas, float x, float y, int level) {
         paint.setColor(levelColor(level));
-        paint.setStyle(Paint.Style.FILL);
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeCap(Paint.Cap.ROUND);
+        float rx, ry;
         if (isNarrow()) {
-            // 3×3 filled square, shifted up 2px to align with staff
-            canvas.drawRect(x - scale, y - 2 * scale, x + 2 * scale, y + scale, paint);
+            rx = 2.5f * scale;
+            ry = 1.5f * scale;
+            paint.setStrokeWidth(0.8f * scale);
         } else {
-            canvas.drawRect(x - 2 * scale, y - 2 * scale, x + 3 * scale, y + 2 * scale, paint);
+            rx = 4.0f * scale;
+            ry = 2.5f * scale;
+            paint.setStrokeWidth(1.1f * scale);
         }
+        // Open oval — standard round whole note
+        canvas.drawOval(x - rx, y - ry, x + rx, y + ry, paint);
     }
 
     private void drawCpNote(Canvas canvas, float x, float y, int level) {
         paint.setColor(levelColor(level));
-        paint.setStyle(Paint.Style.FILL_AND_STROKE);
-        paint.setStrokeWidth(scale);
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeCap(Paint.Cap.ROUND);
+        paint.setStrokeJoin(Paint.Join.MITER);
+        float rx, ry;
         if (isNarrow()) {
-            // X shape
-            canvas.drawLine(x - scale, y - 2 * scale, x + 2 * scale, y + scale, paint);
-            canvas.drawLine(x + 2 * scale, y - 2 * scale, x - scale, y + scale, paint);
+            rx = 2.5f * scale;
+            ry = 1.5f * scale;
+            paint.setStrokeWidth(0.8f * scale);
         } else {
-            paint.setStyle(Paint.Style.FILL);
-            canvas.drawCircle(x, y, 2 * scale, paint);
+            rx = 4.0f * scale;
+            ry = 2.5f * scale;
+            paint.setStrokeWidth(1.1f * scale);
         }
+        // Open diamond — standard diamond/square whole note (e.g. harmonics, CP voice)
+        Path path = new Path();
+        path.moveTo(x,      y - ry);   // top
+        path.lineTo(x + rx, y);        // right
+        path.lineTo(x,      y + ry);   // bottom
+        path.lineTo(x - rx, y);        // left
+        path.close();
+        canvas.drawPath(path, paint);
     }
 
     // ---------------------------------------------------------------
