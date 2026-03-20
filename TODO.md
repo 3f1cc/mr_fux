@@ -1,8 +1,12 @@
 # TODO
 
-## Bugs
+## Features
 
-- In Check mode, when the cursor is on a note that has a rule violation the
-  cursor cannot be moved off of that note.  The cursor is once again able to
-  move if we switch mode (back to Edit) or switch voice.
+Make the app prettier:
 
+- make the notes and staff lines brighter overall, so that the app is more
+  visible in bright light.
+- render the notes as proper whole notes instead of abstract shapes.
+  - Use round notes for CF and square (i.e. diamond shaped) notes for CP.
+  - Rendering should look like notes that we see in standard music typesetting.
+- Add treble and bass clefs to the staff
