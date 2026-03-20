@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">mr_fux</string>
+    <string name="label_cf">CF</string>
+    <string name="label_cp">CP</string>
+    <string name="label_play">▶</string>
+    <string name="label_stop">■</string>
+    <string name="label_check">Check</string>
+    <string name="label_save">Save</string>
+    <string name="label_load">Load</string>
+    <string name="label_settings">Settings</string>
+    <string name="label_cursor_left">◀</string>
+    <string name="label_cursor_right">▶</string>
+    <string name="label_pitch_up">▲</string>
+    <string name="label_pitch_down">▼</string>
+    <string name="hint_save_filename">Filename</string>
+    <string name="title_save">Save Exercise</string>
+    <string name="title_load">Load Exercise</string>
+    <string name="title_settings">Settings</string>
+    <string name="title_overwrite">File Exists</string>
+    <string name="msg_overwrite">Overwrite \"%s\"?</string>
+    <string name="btn_overwrite">Overwrite</string>
+    <string name="btn_rename">Rename</string>
+    <string name="btn_cancel">Cancel</string>
+    <string name="label_length">Length</string>
+    <string name="label_layout">Layout</string>
+    <string name="label_normal">Normal</string>
+    <string name="label_narrow">Narrow</string>
+    <string name="status_check">CHECK</string>
+    <string name="err_load_failed">Could not load file</string>
+</resources>
