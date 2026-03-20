@@ -2,7 +2,7 @@
 
 ## Bugs
 
-- The staff lines are not visible on the screen.  (Black on black?)
-- The app is locked in portrait orientation.  It would be much better for the
-  app to be locked in landscape orientation instead.
+- In Check mode, when the cursor is on a note that has a rule violation the
+  cursor cannot be moved off of that note.  The cursor is once again able to
+  move if we switch mode (back to Edit) or switch voice.
 
